@@ -1,0 +1,23 @@
+# calculator_messages_english.yml
+
+language: "Please choose a language/ Choisissez une langue: 'E' for English, 'F' for French"
+valid_language: "Choose a valid language/ Choisissez une langue valable: E/F"
+welcome: "welcome to the cacluator! Enter your name"
+valid_name: "Make sure you use a valid name"
+hi: "Hi"
+request_first_number: "What's the first number?"
+request_second_number: "What's the second number?"
+valid_number: "Hmm.. that doesn't look like a valid number"
+operation_long: "What operation would you like to perform?\n 1) add\n 2) subtract\n 3) multiply\n 4) divide"
+operation_short: "Must choose 1, 2, 3 or 4"
+operation_output: "the two numbers..."
+result: "The result is "
+calculate_again: "Do you want to perform another calculation? (Y to calculate again)"
+thank_you: "Thank you for using the calculator"
+adding: "Adding"
+subtracting: "Subtracting"
+multiplying: "Multiplying"
+dividing: "Dividing"
+again: "y"
+
+
