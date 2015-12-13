@@ -1,0 +1,5 @@
+# .gitignore
+
+pseudo.rb
+hello.rb
+.rubocop.yml
