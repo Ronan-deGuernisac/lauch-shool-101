@@ -1,0 +1,36 @@
+# loan_calculator_config.yml
+
+
+# loan type
+
+s:
+  description: "Short-term unsecured loan"
+  min_amount: 1000
+  max_amount: 5000
+  min_duration: 1
+  max_duration: 5
+  duration_factor_1: 4
+  amount_factor_1: 4
+  non_numeric: "Please only enter numbers"
+  amount_not_in_range: "Please choose a value between 1000 and 5000"
+  duration_not_in_range: "Please choose a duration between 1 and 5"
+l:
+  description: >
+    Long-term secured loan (note: the assets against which the loan is
+    secured may be at risk if you do not keep up repayments on the loan)
+  min_amount: 5000
+  max_amount: 250000
+  min_duration: 5
+  max_duration: 25
+  duration_factor_1: 3
+  duration_factor_2: 2.75
+  duration_factor_3: 2.5
+  duration_factor_4: 2.25
+  amount_factor_1: 3
+  amount_factor_2: 2.75
+  amount_factor_3: 2.5
+  amount_factor_4: 2.25
+  amount_factor_5: 2
+  non_numeric: "Please only enter numbers"
+  amount_not_in_range: "Please choose a value between 5000 and 250000"
+  duration_not_in_range: "Please choose a duration between 5 and 25"
