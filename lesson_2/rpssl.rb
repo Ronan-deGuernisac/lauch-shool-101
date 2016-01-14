@@ -1,17 +1,21 @@
 # rpssl.rb
 
-VALID_CHOICES = %w(rock paper scissors spock lizard)
+require 'pry'
+
+VALID_CHOICES = {
+  'r' => { name: 'rock', beats: %w(s l) },
+  'p' => { name: 'paper', beats: %w(r k) },
+  's' => { name: 'scissors', beats: %w(p l) },
+  'k' => { name: 'Spock', beats: %w(s r) },
+  'l' => { name: 'lizard', beats: %w(p k) }
+}
 
 def prompt(message)
   Kernel.puts("=> #{message}")
 end
 
 def win?(first, second)
-  (first == 'rock' && (second == 'scissors' || second == 'lizard')) ||
-    (first == 'paper' && (second == 'rock' || second == 'spock')) ||
-    (first == 'scissors' && (second == 'paper' || second == 'lizard')) ||
-    (first == 'spock' && (second == 'scissors' || second == 'rock')) ||
-    (first == 'lizard' && (second == 'paper' || second == 'spock'))
+  VALID_CHOICES[first][:beats].include?(second)
 end
 
 def display_results(player, computer)
@@ -27,19 +31,20 @@ end
 loop do
   choice = ''
   loop do
-    prompt("Choose one: #{VALID_CHOICES.join(', ')}")
+    prompt("The choices are: #{VALID_CHOICES.map { |k, v| "#{k} for #{v[:name]}" }.join(', ')}")
+    prompt("Choose one: #{VALID_CHOICES.keys.join(', ')}")
     choice = Kernel.gets().chomp()
 
-    if VALID_CHOICES.include?(choice)
+    if VALID_CHOICES.keys.include?(choice)
       break
     else
       prompt("That's not a valid choice.")
     end
   end
 
-  computer_choice = VALID_CHOICES.sample
+  computer_choice = VALID_CHOICES.keys.sample
 
-  prompt("You chose #{choice}, computer chose #{computer_choice}")
+  prompt("You chose #{VALID_CHOICES[choice][:name]}, computer chose #{VALID_CHOICES[computer_choice][:name]}")
 
   display_results(choice, computer_choice)
 
