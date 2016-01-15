@@ -19,6 +19,7 @@
 # => P is monthly payment, L is loan amount, n is number of months, c is interest rate
 
 require 'yaml'
+require 'pry'
 
 CONFIG = YAML.load_file('loan_calculator_config.yml')
 
@@ -27,35 +28,32 @@ def prompt(message)
 end
 
 def valid_loan_type?(type)
-  type.downcase == 's' || type.downcase == 'l' ? true : false
+  type.downcase == 's' || type.downcase == 'l'
 end
 
 def only_numbers?(string)
   string =~ /[^0-9]/ ? false : true
 end
 
-def in_range?(amount, val_1, val_2)
-  amount.to_i.between?(CONFIG["#{@loan_type}"]["#{val_1}"], CONFIG["#{@loan_type}"]["#{val_2}"])
+def in_range?(amount, loan_type, val_1, val_2)
+  amount.to_i.between?(CONFIG["#{loan_type}"]["#{val_1}"], CONFIG["#{loan_type}"]["#{val_2}"])
 end
 
-def valid_loan_amount?(amount)
+def invalid_amount?(amount, loan_type)
   if !only_numbers?(amount)
-    @error_type = 'non_numeric'
-    return false
-  elsif !in_range?(amount, 'min_amount', 'max_amount')
-    @error_type = 'amount_not_in_range'
-    return false
+    return 'non_numeric'
+  elsif !in_range?(amount, loan_type, 'min_amount', 'max_amount')
+    return 'amount_not_in_range'
   else
-    true
+    false
   end
 end
 
-def valid_loan_duration?(duration)
-  if !in_range?(duration, 'min_duration', 'max_duration')
-    @error_type = 'duration_not_in_range'
-    return false
+def invalid_duration?(duration, loan_type)
+  if !in_range?(duration, loan_type, 'min_duration', 'max_duration')
+    return 'duration_not_in_range'
   else
-    true
+    false
   end
 end
 
@@ -95,21 +93,21 @@ prompt("Hi #{name}, welcome to the loan calculator. What kind of loan would you 
   Select 'S' for short-term unsecured (up to £#{CONFIG['s']['max_amount']} ) or 'L'
   for long-term secured (up to £#{CONFIG['l']['max_amount']})")
 
-@loan_type = ''
+loan_type = ''
 loop do
-  @loan_type = gets.chomp
-  if valid_loan_type?(@loan_type)
+  loan_type = gets.chomp
+  if valid_loan_type?(loan_type)
     break
   else
     prompt("Please select 'S' for short-term unsecured or 'L' for long-term secured")
   end
 end
 
-loan_description = CONFIG["#{@loan_type}"]['description']
-loan_min_amount = CONFIG["#{@loan_type}"]['min_amount']
-loan_max_amount = CONFIG["#{@loan_type}"]['max_amount']
-loan_min_duration = CONFIG["#{@loan_type}"]['min_duration']
-loan_max_duration = CONFIG["#{@loan_type}"]['max_duration']
+loan_description = CONFIG["#{loan_type}"]['description']
+loan_min_amount = CONFIG["#{loan_type}"]['min_amount']
+loan_max_amount = CONFIG["#{loan_type}"]['max_amount']
+loan_min_duration = CONFIG["#{loan_type}"]['min_duration']
+loan_max_duration = CONFIG["#{loan_type}"]['max_duration']
 
 prompt("You have selected a #{loan_description}
   How much would you like to borrow?
@@ -118,13 +116,13 @@ prompt("You have selected a #{loan_description}
   symbols, e.g. #{loan_min_amount} rather than £1,000.00")
 
 loan_amount = ''
-@error_type = ''
 loop do
   loan_amount = gets.chomp
-  if valid_loan_amount?(loan_amount)
-    break
+  amount_validation = invalid_amount?(loan_amount, loan_type)
+  if amount_validation
+    prompt(CONFIG["#{loan_type}"]["#{amount_validation}"])
   else
-    prompt(CONFIG["#{@loan_type}"]["#{@error_type}"])
+    break
   end
 end
 
@@ -134,16 +132,17 @@ prompt("For what duration in years would you like to borrow £#{loan_amount}?
 loan_duration = ''
 loop do
   loan_duration = gets.chomp
-  if valid_loan_duration?(loan_duration)
-    break
+  duration_validation = invalid_duration?(loan_duration, loan_type)
+  if duration_validation
+    prompt(CONFIG["#{loan_type}"]["#{@error_type}"])
   else
-    prompt(CONFIG["#{@loan_type}"]["#{@error_type}"])
+    break
   end
 end
 
 monthly_duration = loan_duration.to_i * 12
 
-apr = CONFIG["#{@loan_type}"]["#{duration_factor(loan_duration)}"] + CONFIG["#{@loan_type}"]["#{amount_factor(loan_amount)}"]
+apr = CONFIG["#{loan_type}"]["#{duration_factor(loan_duration)}"] + CONFIG["#{loan_type}"]["#{amount_factor(loan_amount)}"]
 
 monthly_rate = (apr.to_f / 100) / 12
 
@@ -152,7 +151,7 @@ monthly_repayment = (loan_amount.to_i * (monthly_rate * (1 + monthly_rate)**mont
 total_loan_amount = (monthly_repayment * monthly_duration).round(2)
 
 prompt("#{name}, you selected a #{loan_description} for an amount of £#{loan_amount}
-  and for a duration of #{loan_duration} years. This loan would have an APR of #{apr},
+  and for a duration of #{loan_duration} years. This loan would have an APR of #{apr}%,
   monthly repayments of #{monthly_repayment} for #{monthly_duration} giving a total loan
   amount of £#{total_loan_amount}.
   Thank-you for using the loan calculator today.")
