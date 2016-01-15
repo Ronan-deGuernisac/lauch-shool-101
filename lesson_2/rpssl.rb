@@ -1,7 +1,5 @@
 # rpssl.rb
 
-require 'pry'
-
 VALID_CHOICES = {
   'r' => { name: 'rock', beats: %w(s l) },
   'p' => { name: 'paper', beats: %w(r k) },
