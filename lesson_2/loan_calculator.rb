@@ -39,19 +39,19 @@ def in_range?(amount, loan_type, val_1, val_2)
   amount.to_i.between?(CONFIG["#{loan_type}"]["#{val_1}"], CONFIG["#{loan_type}"]["#{val_2}"])
 end
 
-def invalid_amount?(amount, loan_type)
+def invalid_amount(amount, loan_type)
   if !only_numbers?(amount)
-    return 'non_numeric'
+    'non_numeric'
   elsif !in_range?(amount, loan_type, 'min_amount', 'max_amount')
-    return 'amount_not_in_range'
+    'amount_not_in_range'
   else
     false
   end
 end
 
-def invalid_duration?(duration, loan_type)
+def invalid_duration(duration, loan_type)
   if !in_range?(duration, loan_type, 'min_duration', 'max_duration')
-    return 'duration_not_in_range'
+    'duration_not_in_range'
   else
     false
   end
@@ -89,9 +89,13 @@ prompt("What is your name?")
 
 name = gets.chomp
 
-prompt("Hi #{name}, welcome to the loan calculator. What kind of loan would you like?
+prompt(
+  <<-EOT
+  "Hi #{name}, welcome to the loan calculator. What kind of loan would you like?
   Select 'S' for short-term unsecured (up to £#{CONFIG['s']['max_amount']} ) or 'L'
-  for long-term secured (up to £#{CONFIG['l']['max_amount']})")
+  for long-term secured (up to £#{CONFIG['l']['max_amount']})"
+  EOT
+  )
 
 loan_type = ''
 loop do
@@ -109,16 +113,20 @@ loan_max_amount = CONFIG["#{loan_type}"]['max_amount']
 loan_min_duration = CONFIG["#{loan_type}"]['min_duration']
 loan_max_duration = CONFIG["#{loan_type}"]['max_duration']
 
-prompt("You have selected a #{loan_description}
+prompt(
+  <<-EOT
+  You have selected a #{loan_description}
   How much would you like to borrow?
   Please choose an amount between £#{loan_min_amount} and £#{loan_max_amount}.
   Please enter your amount as a whole number without any other characters or
-  symbols, e.g. #{loan_min_amount} rather than £1,000.00")
+  symbols, e.g. #{loan_min_amount} rather than £1,000.00
+  EOT
+  )
 
 loan_amount = ''
 loop do
   loan_amount = gets.chomp
-  amount_validation = invalid_amount?(loan_amount, loan_type)
+  amount_validation = invalid_amount(loan_amount, loan_type)
   if amount_validation
     prompt(CONFIG["#{loan_type}"]["#{amount_validation}"])
   else
@@ -132,9 +140,9 @@ prompt("For what duration in years would you like to borrow £#{loan_amount}?
 loan_duration = ''
 loop do
   loan_duration = gets.chomp
-  duration_validation = invalid_duration?(loan_duration, loan_type)
+  duration_validation = invalid_duration(loan_duration, loan_type)
   if duration_validation
-    prompt(CONFIG["#{loan_type}"]["#{@error_type}"])
+    prompt(CONFIG["#{loan_type}"]["#{duration_validation}"])
   else
     break
   end
@@ -146,12 +154,19 @@ apr = CONFIG["#{loan_type}"]["#{duration_factor(loan_duration)}"] + CONFIG["#{lo
 
 monthly_rate = (apr.to_f / 100) / 12
 
-monthly_repayment = (loan_amount.to_i * (monthly_rate * (1 + monthly_rate)**monthly_duration) / ((1 + monthly_rate)**monthly_duration - 1)).round(2)
+monthly_repayment = (loan_amount.to_i * (monthly_rate * (1 + monthly_rate)**monthly_duration) / 
+  ((1 + monthly_rate)**monthly_duration - 1)).round(2)
 
 total_loan_amount = (monthly_repayment * monthly_duration).round(2)
 
-prompt("#{name}, you selected a #{loan_description} for an amount of £#{loan_amount}
-  and for a duration of #{loan_duration} years. This loan would have an APR of #{apr}%,
-  monthly repayments of #{monthly_repayment} for #{monthly_duration} giving a total loan
-  amount of £#{total_loan_amount}.
-  Thank-you for using the loan calculator today.")
+prompt(
+  <<-EOT
+  "#{name}, you selected a #{loan_description} 
+  for an amount of £#{loan_amount}
+  and for a duration of #{loan_duration} years. 
+  This loan would have an APR of #{apr}%,
+  monthly repayments of #{monthly_repayment} for #{monthly_duration} 
+  giving a total loan amount of £#{total_loan_amount}.
+  Thank-you for using the loan calculator today."
+  EOT
+  )

@@ -18,21 +18,19 @@ end
 
 def decide_result(player, computer)
   if win?(player, computer)
-    return :player
+    :player
   elsif win?(computer, player)
-    return :computer
+    :computer
   else
-    return :tie
+    :tie
   end
 end
 
 def display_results(result)
-  if result == :player
-    prompt("You won!")
-  elsif result == :computer
-    prompt("Computer won!")
-  else
-    prompt("It's a tie.")
+  case result
+  when :player then prompt("You won!")
+  when :computer then prompt("Computer won!")
+  else prompt("It's a tie.")
   end
 end
 
@@ -43,18 +41,18 @@ end
 
 def overall_winner?(scores)
   if scores[:player] >= 5
-    return :player
+    :player
   elsif scores[:computer] >= 5
-    return :computer
+    :computer
   else
     false
   end
 end
 
 loop do
-  prompt("Welcome to #{VALID_CHOICES.map { |_, v| "#{v[:name]}" }.join(', ')}!")
+  prompt("Welcome to #{VALID_CHOICES.map { |_, details| "#{details[:name]}" }.join(', ')}!")
   prompt("First player to score 5 wins!")
-  prompt("The choices are: #{VALID_CHOICES.map { |k, v| "#{k} for #{v[:name]}" }.join(', ')}")
+  prompt("The choices are: #{VALID_CHOICES.map { |letter, details| "#{letter} for #{details[:name]}" }.join(', ')}")
 
   scores = { player: 0, computer: 0 }
   loop do
@@ -67,20 +65,15 @@ loop do
         break
       else
         prompt("That's not a valid choice.")
-        prompt("The choices are: #{VALID_CHOICES.map { |k, v| "#{k} for #{v[:name]}" }.join(', ')}")
+        prompt("The choices are: #{VALID_CHOICES.map { |letter, details| "#{letter} for #{details[:name]}" }.join(', ')}")
       end
     end
 
     computer_choice = VALID_CHOICES.keys.sample
-
     prompt("You chose #{VALID_CHOICES[choice][:name]}, computer chose #{VALID_CHOICES[computer_choice][:name]}")
-
     result = decide_result(choice, computer_choice)
-
     display_results(result)
-
     scores = increment_score(result, scores)
-
     overall_winner = overall_winner?(scores)
 
     if overall_winner == :player
