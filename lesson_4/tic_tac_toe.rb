@@ -57,10 +57,10 @@ def empty_squares(brd)
   brd.keys.select { |num| brd[num] == INITIAL_MARKER }
 end
 
-def threat_squares(brd)
+def threat_squares(brd, marker)
   threat_squares = []
   WINNING_LINES.each do |line|
-    if brd.values_at(line[0], line[1], line[2]).count(PLAYER_MARKER) == 2 &&
+    if brd.values_at(line[0], line[1], line[2]).count(marker) == 2 &&
        brd.values_at(line[0], line[1], line[2]).count(INITIAL_MARKER) == 1
       line.each { |square| threat_squares << square if brd[square] == INITIAL_MARKER }
     else
@@ -82,16 +82,18 @@ def player_places_piece!(brd)
 end
 
 def computer_places_piece!(brd)
-  if immediate_threat?(brd)
-    square = threat_squares(brd).sample
+  if immediate_threat?(brd, PLAYER_MARKER)
+    square = threat_squares(brd, PLAYER_MARKER).sample
+  elsif immediate_threat?(brd, COMPUTER_MARKER)
+    square = threat_squares(brd, COMPUTER_MARKER).sample
   else
     square = empty_squares(brd).sample
   end
   brd[square] = COMPUTER_MARKER
 end
 
-def immediate_threat?(brd)
-  !threat_squares(brd).empty?
+def immediate_threat?(brd, marker)
+  !threat_squares(brd, marker).empty?
 end
 
 def board_full?(brd)
