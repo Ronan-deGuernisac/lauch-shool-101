@@ -43,6 +43,10 @@ def display_board(brd)
 end
 # rubocop:enable Metrics/AbcSize
 
+def initialize_scores
+  scores = {'Player' => 0, 'Computer' => 0}
+end
+
 def initialize_board
   new_board = {}
   (1..9).each { |num| new_board[num] = INITIAL_MARKER }
@@ -77,17 +81,16 @@ def someone_won?(brd)
   !!detect_winner(brd)
 end
 
+def overall_winner?(scores)
+  !!detect_overall_winner(scores)
+end
+
+def increment_scores(scores, winner)
+  scores[winner] += 1
+end
+
 def detect_winner(brd)
   WINNING_LINES.each do |line|
-    # if brd[line[0]] == PLAYER_MARKER &&
-    #    brd[line[1]] == PLAYER_MARKER &&
-    #    brd[line[2]] == PLAYER_MARKER
-    #   return 'Player'
-    # elsif brd[line[0]] == COMPUTER_MARKER &&
-    #       brd[line[1]] == COMPUTER_MARKER &&
-    #       brd[line[2]] == COMPUTER_MARKER
-    #   return 'Computer'
-    # end
     if brd.values_at(line[0], line[1], line[2]).count(PLAYER_MARKER) == 3
       return 'Player'
     elsif brd.values_at(line[0], line[1], line[2]).count(COMPUTER_MARKER) == 3
@@ -97,31 +100,51 @@ def detect_winner(brd)
   nil
 end
 
-loop do
-  board = initialize_board
-  display_board(board)
+def detect_overall_winner(scores)
+  if scores.values.include?(5)
+    return scores.key(5)
+  else
+    nil
+  end
+end
 
-  loop do
+loop do # overall game loop
+  scores = initialize_scores
+  prompt "Welcome to Tic Tac Toe!"
+
+  loop do # individual game loop
+    board = initialize_board
     display_board(board)
 
-    player_places_piece!(board)
-    break if someone_won?(board) || board_full?(board)
+    loop do # game turn loop
+      display_board(board)
 
-    computer_places_piece!(board)
-    break if someone_won?(board) || board_full?(board)
+      player_places_piece!(board)
+      break if someone_won?(board) || board_full?(board)
+
+      computer_places_piece!(board)
+      break if someone_won?(board) || board_full?(board)
+    end
+
+    display_board(board)
+
+    if someone_won?(board)
+      winner = detect_winner(board)
+      prompt "#{winner} won!"
+      increment_scores(scores, winner)
+    else
+      prompt "It's a tie!"
+    end
+
+    prompt "The scores are:"
+    scores.each { |player, score| puts "#{player} has #{score}."}
+    sleep(2)
+    break if overall_winner?(scores)
   end
 
-  display_board(board)
-
-  if someone_won?(board)
-    prompt "#{detect_winner(board)} won!"
-  else
-    prompt "It's a tie!"
-  end
-
+  prompt "#{detect_overall_winner(scores)} won the whole game!"
   prompt "Play again?"
   answer = gets.chomp
   break unless answer.downcase.start_with?('y')
 end
-
 prompt "Thanks for playing Tic Tac Toe. Goodbye!"
