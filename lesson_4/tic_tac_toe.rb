@@ -10,7 +10,7 @@ PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
 BEST_SQUARE = 5
 FIRST_GO = 'Choose'
-PLAYERS = {'P' => 'Player', 'C' => 'Computer'}
+PLAYERS = { 'P' => 'Player', 'C' => 'Computer' }
 
 def prompt(msg)
   puts "=> #{msg}"
@@ -47,7 +47,7 @@ end
 # rubocop:enable Metrics/AbcSize
 
 def initialize_scores
-  scores = {'Player' => 0, 'Computer' => 0}
+  { 'Player' => 0, 'Computer' => 0 }
 end
 
 def initialize_board
@@ -81,8 +81,6 @@ def threat_squares(brd, marker)
     if brd.values_at(line[0], line[1], line[2]).count(marker) == 2 &&
        brd.values_at(line[0], line[1], line[2]).count(INITIAL_MARKER) == 1
       line.each { |square| threat_squares << square if brd[square] == INITIAL_MARKER }
-    else
-      nil
     end
   end
   threat_squares
@@ -167,8 +165,6 @@ end
 def detect_overall_winner(scores)
   if scores.values.include?(5)
     return scores.key(5)
-  else
-    nil
   end
 end
 
@@ -177,7 +173,7 @@ loop do # overall game loop
   prompt "Welcome to Tic Tac Toe!"
   current_player = ''
   if FIRST_GO == 'Choose'
-    current_player = select_player 
+    current_player = select_player
   else
     current_player = FIRST_GO
   end
@@ -190,7 +186,7 @@ loop do # overall game loop
       display_board(board)
       place_piece!(board, current_player)
       current_player = alternate_player(current_player)
-      break if someone_won?(board) || board_full?(board)   
+      break if someone_won?(board) || board_full?(board)
     end
 
     display_board(board)
@@ -204,7 +200,7 @@ loop do # overall game loop
     end
 
     prompt "The scores are:"
-    scores.each { |player, score| puts "#{player} has #{score}."}
+    scores.each { |player, score| puts "#{player} has #{score}." }
     sleep(2)
     break if overall_winner?(scores)
   end
