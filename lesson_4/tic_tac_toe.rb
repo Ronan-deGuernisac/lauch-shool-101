@@ -8,17 +8,20 @@ WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
+BEST_SQUARE = 5
+FIRST_GO = 'Choose'
+PLAYERS = {'P' => 'Player', 'C' => 'Computer'}
 
 def prompt(msg)
   puts "=> #{msg}"
 end
 
 def joinor(array, mainseparator=', ', finalseparator=' or ')
-  final_item = array.pop
+  final_item = array.pop.to_s
   if array.length > 1
-    string = array.join(mainseparator) + ' ' + finalseparator + ' ' + final_item.to_s
+    string = array.join(mainseparator) + ' ' + finalseparator + ' ' + final_item
   else
-    string = final_item.to_s
+    string = final_item
   end
   string
 end
@@ -53,6 +56,21 @@ def initialize_board
   new_board
 end
 
+def select_player
+  current_player = ''
+  loop do
+    prompt "Choose who goes first. P = Player, C = Computer"
+    choice = gets.chomp.upcase
+    if PLAYERS.keys.include?(choice)
+      current_player = PLAYERS[choice]
+      break
+    else
+      prompt "Sorry, that's not a valid choice. Choose P or C"
+    end
+  end
+  current_player
+end
+
 def empty_squares(brd)
   brd.keys.select { |num| brd[num] == INITIAL_MARKER }
 end
@@ -82,18 +100,41 @@ def player_places_piece!(brd)
 end
 
 def computer_places_piece!(brd)
-  if immediate_threat?(brd, PLAYER_MARKER)
-    square = threat_squares(brd, PLAYER_MARKER).sample
-  elsif immediate_threat?(brd, COMPUTER_MARKER)
+  if immediate_threat?(brd, COMPUTER_MARKER)
     square = threat_squares(brd, COMPUTER_MARKER).sample
+  elsif immediate_threat?(brd, PLAYER_MARKER)
+    square = threat_squares(brd, PLAYER_MARKER).sample
+  elsif best_square_empty?(brd)
+    square = BEST_SQUARE
   else
     square = empty_squares(brd).sample
   end
   brd[square] = COMPUTER_MARKER
 end
 
+def place_piece!(brd, current_player)
+  if current_player == 'Player'
+    player_places_piece!(brd)
+  else
+    computer_places_piece!(brd)
+  end
+end
+
+def alternate_player(current_player)
+  if current_player == 'Player'
+    new_current_player = 'Computer'
+  else
+    new_current_player = 'Player'
+  end
+  new_current_player
+end
+
 def immediate_threat?(brd, marker)
   !threat_squares(brd, marker).empty?
+end
+
+def best_square_empty?(brd)
+  brd[BEST_SQUARE] == INITIAL_MARKER
 end
 
 def board_full?(brd)
@@ -134,6 +175,12 @@ end
 loop do # overall game loop
   scores = initialize_scores
   prompt "Welcome to Tic Tac Toe!"
+  current_player = ''
+  if FIRST_GO == 'Choose'
+    current_player = select_player 
+  else
+    current_player = FIRST_GO
+  end
 
   loop do # individual game loop
     board = initialize_board
@@ -141,12 +188,9 @@ loop do # overall game loop
 
     loop do # game turn loop
       display_board(board)
-
-      player_places_piece!(board)
-      break if someone_won?(board) || board_full?(board)
-
-      computer_places_piece!(board)
-      break if someone_won?(board) || board_full?(board)
+      place_piece!(board, current_player)
+      current_player = alternate_player(current_player)
+      break if someone_won?(board) || board_full?(board)   
     end
 
     display_board(board)
