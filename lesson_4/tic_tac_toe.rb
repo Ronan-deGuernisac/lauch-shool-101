@@ -63,6 +63,8 @@ def threat_squares(brd)
     if brd.values_at(line[0], line[1], line[2]).count(PLAYER_MARKER) == 2 &&
        brd.values_at(line[0], line[1], line[2]).count(INITIAL_MARKER) == 1
       line.each { |square| threat_squares << square if brd[square] == INITIAL_MARKER }
+    else
+      nil
     end
   end
   threat_squares
