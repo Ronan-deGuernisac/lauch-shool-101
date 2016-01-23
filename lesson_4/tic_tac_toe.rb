@@ -15,13 +15,12 @@ def prompt(msg)
 end
 
 def joinor(array, mainseparator=', ', finalseparator=' or ')
-  final_item = array.pop.to_s
-  if array.length > 1
-    string = array.join(mainseparator) + ' ' + finalseparator + ' ' + final_item
+  final_item = array.pop
+  if array.length > 0
+    "#{array.join(mainseparator)} #{finalseparator} #{final_item}"
   else
-    string = final_item
+    "#{final_item}"
   end
-  string
 end
 
 # rubocop:disable Metrics/AbcSize
@@ -55,18 +54,12 @@ def initialize_board
 end
 
 def select_player
-  current_player = ''
   loop do
     prompt "Choose who goes first. P = Player, C = Computer"
     choice = gets.chomp.upcase
-    if PLAYERS.keys.include?(choice)
-      current_player = PLAYERS[choice]
-      break
-    else
-      prompt "Sorry, that's not a valid choice. Choose P or C"
-    end
+    break PLAYERS[choice] if PLAYERS.keys.include?(choice)
+    prompt "Sorry, that's not a valid choice. Choose P or C"
   end
-  current_player
 end
 
 def empty_squares(brd)
@@ -76,8 +69,8 @@ end
 def threat_squares(brd, marker)
   threat_squares = []
   WINNING_LINES.each do |line|
-    if brd.values_at(line[0], line[1], line[2]).count(marker) == 2 &&
-       brd.values_at(line[0], line[1], line[2]).count(INITIAL_MARKER) == 1
+    if brd.values_at(*line).count(marker) == 2 &&
+       brd.values_at(*line).count(INITIAL_MARKER) == 1
       line.each { |square| threat_squares << square if brd[square] == INITIAL_MARKER }
     end
   end
@@ -97,15 +90,14 @@ end
 
 def computer_places_piece!(brd)
   if immediate_threat?(brd, COMPUTER_MARKER)
-    square = threat_squares(brd, COMPUTER_MARKER).sample
+    brd[threat_squares(brd, COMPUTER_MARKER).sample] = COMPUTER_MARKER
   elsif immediate_threat?(brd, PLAYER_MARKER)
-    square = threat_squares(brd, PLAYER_MARKER).sample
+    brd[threat_squares(brd, PLAYER_MARKER).sample] = COMPUTER_MARKER
   elsif best_square_empty?(brd)
-    square = BEST_SQUARE
+    brd[BEST_SQUARE] = COMPUTER_MARKER
   else
-    square = empty_squares(brd).sample
+    brd[empty_squares(brd).sample] = COMPUTER_MARKER
   end
-  brd[square] = COMPUTER_MARKER
 end
 
 def place_piece!(brd, current_player)
@@ -117,12 +109,7 @@ def place_piece!(brd, current_player)
 end
 
 def alternate_player(current_player)
-  if current_player == 'Player'
-    new_current_player = 'Computer'
-  else
-    new_current_player = 'Player'
-  end
-  new_current_player
+  current_player == 'Player' ? 'Computer' : 'Player'
 end
 
 def immediate_threat?(brd, marker)
@@ -151,9 +138,9 @@ end
 
 def detect_winner(brd)
   WINNING_LINES.each do |line|
-    if brd.values_at(line[0], line[1], line[2]).count(PLAYER_MARKER) == 3
+    if brd.values_at(*line).count(PLAYER_MARKER) == 3
       return 'Player'
-    elsif brd.values_at(line[0], line[1], line[2]).count(COMPUTER_MARKER) == 3
+    elsif brd.values_at(*line).count(COMPUTER_MARKER) == 3
       return 'Computer'
     end
   end
@@ -161,20 +148,18 @@ def detect_winner(brd)
 end
 
 def detect_overall_winner(scores)
-  if scores.values.include?(5)
-    return scores.key(5)
-  end
+  scores.key(5) if scores.values.include?(5)
+end
+
+def play_again?
+  gets.chomp.downcase.start_with?('y') ? true : false
 end
 
 loop do # overall game loop
   scores = initialize_scores
   prompt "Welcome to Tic Tac Toe!"
   current_player = ''
-  if FIRST_GO == 'Choose'
-    current_player = select_player
-  else
-    current_player = FIRST_GO
-  end
+  FIRST_GO != 'Choose' ? current_player = FIRST_GO : current_player = select_player
 
   loop do # individual game loop
     board = initialize_board
@@ -205,7 +190,6 @@ loop do # overall game loop
 
   prompt "#{detect_overall_winner(scores)} won the whole game!"
   prompt "Play again?"
-  answer = gets.chomp
-  break unless answer.downcase.start_with?('y')
+  break unless play_again?
 end
 prompt "Thanks for playing Tic Tac Toe. Goodbye!"
