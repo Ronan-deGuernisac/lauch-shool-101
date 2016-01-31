@@ -81,7 +81,7 @@ def show_table(hands, dealer_hidden=true)
 end
 
 def busted?(hand)
-  calculate_score(hand) > HIGHEST_SCORE ? true : false
+  calculate_score(hand) > HIGHEST_SCORE
 end
 
 def calculate_score(hand)
@@ -94,7 +94,7 @@ end
 def any_aces?(hand)
   value_symbols = []
   hand.each { |card| value_symbols << card[:value_symbol] }
-  value_symbols.include?("A") ? true : false
+  value_symbols.include?("A")
 end
 
 def ace_count(hand)
@@ -182,7 +182,7 @@ def decide_winner(hands)
 end
 
 def play_again?
-  gets.chomp.downcase.start_with?('y') ? true : false
+  gets.chomp.downcase.start_with?('y')
 end
 
 loop do
