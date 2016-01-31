@@ -148,7 +148,7 @@ end
 
 def announce_bust(hands, current_player)
   show_table(hands, false)
-  prompt "#{current_player} busted!" if busted?(hands[current_player])
+  prompt "#{current_player} busted!"
 end
 
 def play_turn(deck, hands, current_player)
