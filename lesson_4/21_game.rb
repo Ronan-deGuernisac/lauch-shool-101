@@ -1,27 +1,27 @@
 # 21_game.rb
 
-CARD_SUITS = [
-  { suit_name: "Spades", suit_symbol: "\u2660" },
-  { suit_name: "Hearts", suit_symbol: "\u2665" },
-  { suit_name: "Clubs", suit_symbol: "\u2663" },
-  { suit_name: "Diamonds", suit_symbol: "\u2666" }
+SUITS = [
+  { name: "Spades", symbol: "\u2660" },
+  { name: "Hearts", symbol: "\u2665" },
+  { name: "Clubs", symbol: "\u2663" },
+  { name: "Diamonds", symbol: "\u2666" }
 ]
 
-CARD_VALUES = [
-  { value_name: "One", value_symbol: "1", points: 1 },
-  { value_name: "Two", value_symbol: "2", points: 2 },
-  { value_name: "Three", value_symbol: "3", points: 3 },
-  { value_name: "Four", value_symbol: "4", points: 4 },
-  { value_name: "Five", value_symbol: "5", points: 5 },
-  { value_name: "Six", value_symbol: "6", points: 6 },
-  { value_name: "Seven", value_symbol: "7", points: 7 },
-  { value_name: "Eight", value_symbol: "8", points: 8 },
-  { value_name: "Nine", value_symbol: "9", points: 9 },
-  { value_name: "Ten", value_symbol: "10", points: 10 },
-  { value_name: "Jack", value_symbol: "J", points: 10 },
-  { value_name: "Queen", value_symbol: "Q", points: 10 },
-  { value_name: "King", value_symbol: "K", points: 10 },
-  { value_name: "Ace", value_symbol: "A", points: 11 }
+CARDS = [
+  { name: "One", symbol: "1", points: 1 },
+  { name: "Two", symbol: "2", points: 2 },
+  { name: "Three", symbol: "3", points: 3 },
+  { name: "Four", symbol: "4", points: 4 },
+  { name: "Five", symbol: "5", points: 5 },
+  { name: "Six", symbol: "6", points: 6 },
+  { name: "Seven", symbol: "7", points: 7 },
+  { name: "Eight", symbol: "8", points: 8 },
+  { name: "Nine", symbol: "9", points: 9 },
+  { name: "Ten", symbol: "10", points: 10 },
+  { name: "Jack", symbol: "J", points: 10 },
+  { name: "Queen", symbol: "Q", points: 10 },
+  { name: "King", symbol: "K", points: 10 },
+  { name: "Ace", symbol: "A", points: 11 }
 ]
 
 HIGHEST_SCORE = 21
@@ -33,11 +33,11 @@ def prompt(msg)
 end
 
 def initialise_deck(deck)
-  CARD_SUITS.each do |suit|
-    CARD_VALUES.each do |value|
+  SUITS.each do |suit|
+    CARDS.each do |card|
       deck << {
-        suit_name: suit[:suit_name], suit_symbol: suit[:suit_symbol],
-        value_name: value[:value_name], value_symbol: value[:value_symbol], points: value[:points]
+        suit_name: suit[:name], suit_symbol: suit[:symbol],
+        card_name: card[:name], card_symbol: card[:symbol], points: card[:points]
       }
       deck.shuffle!
     end
@@ -50,15 +50,15 @@ def deal_initial_cards(deck, hands)
   end
 end
 
-def deal_card(deck, hand, announce_card=true)
+def deal_card(deck, hand, announce=true)
   card = deck.shift
   hand << card
-  announce_card(card) if announce_card
+  announce_card(card) if announce
 end
 
 def show_cards(hand, hidden_card=false)
   cards = []
-  hand.each { |card| cards << "#{card[:value_symbol]}#{card[:suit_symbol]}" }
+  hand.each { |card| cards << "#{card[:card_symbol]}#{card[:suit_symbol]}" }
   cards[0] = "??" if hidden_card
   cards.join("  ")
 end
@@ -71,7 +71,7 @@ def show_score(hand, hidden_card=false)
 end
 
 def show_table(hands, dealer_hidden=true)
-  system 'clear'
+  system 'clear' or system 'cls'
   puts "-----------------------------------------"
   puts " PLAYER | SCORE  | CARDS"
   puts "-----------------------------------------"
@@ -91,15 +91,9 @@ def calculate_score(hand)
   score
 end
 
-def any_aces?(hand)
-  value_symbols = []
-  hand.each { |card| value_symbols << card[:value_symbol] }
-  value_symbols.include?("A")
-end
-
 def ace_count(hand)
   ace_count = 0
-  hand.each { |card| ace_count += 1 if card[:value_symbol] == "A" }
+  hand.each { |card| ace_count += 1 if card[:card_symbol] == "A" }
   ace_count
 end
 
@@ -116,7 +110,7 @@ def dealer_hit_or_stick(hand)
   calculate_score(hand) >= DEALER_STICK_SCORE ? "s" : "h"
 end
 
-def invalid_choice?(choice)
+def valid_choice?(choice)
   PLAYER_OPTIONS.key?(choice)
 end
 
@@ -125,8 +119,8 @@ def player_choice
   loop do
     prompt "Hit or Stick? (type H or S)"
     hit_or_stick = gets.chomp
-    prompt "Sorry, that's not a valid choice" if !invalid_choice?(hit_or_stick.downcase)
-    break if hit_or_stick.downcase == 'h' || hit_or_stick.downcase == 's'
+    break unless !valid_choice?(hit_or_stick.downcase)
+    prompt "Sorry, that's not a valid choice"
   end
   hit_or_stick
 end
@@ -142,7 +136,7 @@ def announce_choice(player, choice)
 end
 
 def announce_card(card)
-  prompt "Card dealt was a #{card[:value_name]} of #{card[:suit_name]}"
+  prompt "Card dealt was a #{card[:card_name]} of #{card[:suit_name]}"
   sleep(2)
 end
 
@@ -153,11 +147,17 @@ end
 
 def play_turn(deck, hands, current_player)
   loop do
-    current_player == 'Dealer' ? show_table(hands, false) : show_table(hands)
-    current_player == 'Player' ? hit_or_stick = player_choice : hit_or_stick = dealer_choice(hands[current_player])
+    hit_or_stick = case current_player
+                   when 'Dealer'
+                     show_table(hands, false)
+                     dealer_choice(hands[current_player])
+                   when 'Player'
+                     show_table(hands)
+                     player_choice
+                   end
     announce_choice(current_player, hit_or_stick)
-    deal_card(deck, hands[current_player]) if hit_or_stick.downcase == "h"
-    break if busted?(hands[current_player]) || hit_or_stick.downcase == "s"
+    deal_card(deck, hands[current_player]) if hit_or_stick.downcase == 'h'
+    break if busted?(hands[current_player]) || hit_or_stick.downcase == 's'
   end
 end
 
