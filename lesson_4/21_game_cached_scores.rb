@@ -1,3 +1,4 @@
+
 # 21_game.rb
 
 SUITS = [
@@ -53,11 +54,11 @@ end
 def deal_card(deck, hand, scores, current_player, announce=true)
   card = deck.shift
   hand << card
-  update_score(hand, scores, card, current_player)
+  update_score(hand, scores, current_player)
   announce_card(card) if announce
 end
 
-def update_score(hand, scores, card, current_player)
+def update_score(hand, scores, current_player)
   scores[current_player] = calculate_score(hand)
 end
 
@@ -150,7 +151,7 @@ def announce_bust(hands, scores, current_player)
 end
 
 def play_turn(deck, hands, scores, current_player)
-  loop do 
+  loop do
     hit_or_stick = case current_player
                    when 'Dealer'
                      show_table(hands, scores, false)
