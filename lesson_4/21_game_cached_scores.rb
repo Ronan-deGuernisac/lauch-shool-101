@@ -1,4 +1,3 @@
-
 # 21_game.rb
 
 SUITS = [
