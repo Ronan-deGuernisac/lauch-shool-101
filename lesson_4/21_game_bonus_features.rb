@@ -44,6 +44,10 @@ def initialise_deck(deck)
   end
 end
 
+def clear_hands(hands)
+  hands.each_value(&:clear)
+end
+
 def deal_initial_cards(deck, hands)
   2.times do
     hands.each { |_, hand| deal_card(deck, hand, false) }
@@ -72,14 +76,14 @@ end
 
 def show_table(rounds, hands, dealer_hidden=true)
   system 'clear' or system 'cls'
-  puts "-----------------------------------------"
-  puts "### #{HIGHEST_SCORE} GAME ###".center(41)
-  puts "-----------------------------------------"
+  puts "--------------------------------------------------------"
+  puts "### #{HIGHEST_SCORE} GAME ###".center(56)
+  puts "--------------------------------------------------------"
   puts " PLAYER | ROUNDS | SCORE  | CARDS"
-  puts "-----------------------------------------"
+  puts "--------------------------------------------------------"
   puts " Player |   #{rounds['Player']}    |   #{show_score(hands['Player'])}   | #{show_cards(hands['Player'])}"
   puts " Dealer |   #{rounds['Dealer']}    |   #{show_score(hands['Dealer'], dealer_hidden)}   | #{show_cards(hands['Dealer'], dealer_hidden)}"
-  puts "-----------------------------------------"
+  puts "--------------------------------------------------------"
 end
 
 def busted?(hand)
@@ -185,7 +189,7 @@ def decide_winner(hands)
   elsif busted?(hands['Player'])
     'Dealer'
   elsif player_score == dealer_score
-    'Tie'  
+    'Tie'
   elsif player_score > dealer_score
     'Player'
   else
@@ -194,7 +198,7 @@ def decide_winner(hands)
 end
 
 def award_point(rounds, winner)
-  rounds[winner] += 1
+  rounds[winner] += 1 if winner != 'Tie'
 end
 
 def overall_winner?(rounds)
@@ -205,33 +209,39 @@ def detect_overall_winner(rounds)
   rounds.key(5) if rounds.values.include?(5)
 end
 
+def announce_overall_winner(rounds, hands)
+  show_table(rounds, hands, false)
+  prompt "#{detect_overall_winner(rounds)} won the whole game!"
+end
+
 def play_again?
   gets.chomp.downcase.start_with?('y')
 end
 
 loop do # overall game loop
   rounds = { 'Player' => 0, 'Dealer' => 0 }
+  hands = { 'Player' => [], 'Dealer' => [] }
   loop do # individual game loop
     deck = []
     initialise_deck(deck)
-    hands = { 'Player' => [], 'Dealer' => [] }
+    clear_hands(hands)
     deal_initial_cards(deck, hands)
 
     play_turn(rounds, deck, hands, 'Player')
-
     if busted?(hands['Player'])
       announce_bust(rounds, hands, 'Player')
     else
       play_turn(rounds, deck, hands, 'Dealer')
       announce_bust(rounds, hands, 'Dealer') if busted?(hands['Dealer'])
     end
+
     winner = decide_winner(hands)
     award_point(rounds, winner)
     declare_winner(winner)
     break if overall_winner?(rounds)
   end
 
-  prompt "#{detect_overall_winner(rounds)} won the whole game!"
+  announce_overall_winner(rounds, hands)
   prompt "Play again?"
   break unless play_again?
 end
