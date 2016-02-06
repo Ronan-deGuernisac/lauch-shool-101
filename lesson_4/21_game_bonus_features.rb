@@ -8,7 +8,6 @@ SUITS = [
 ]
 
 CARDS = [
-  { name: "One", symbol: "1", points: 1 },
   { name: "Two", symbol: "2", points: 2 },
   { name: "Three", symbol: "3", points: 3 },
   { name: "Four", symbol: "4", points: 4 },
@@ -75,15 +74,27 @@ def show_score(hand, hidden_card=false)
 end
 
 def show_table(rounds, hands, dealer_hidden=true)
-  system 'clear' or system 'cls'
+  system('clear') || system('cls')
   puts "--------------------------------------------------------"
   puts "### #{HIGHEST_SCORE} GAME ###".center(56)
   puts "--------------------------------------------------------"
-  puts " PLAYER | ROUNDS | SCORE  | CARDS"
+  puts " PLAYER | ROUNDS |   SCORE    | CARDS"
   puts "--------------------------------------------------------"
-  puts " Player |   #{rounds['Player']}    |   #{show_score(hands['Player'])}   | #{show_cards(hands['Player'])}"
-  puts " Dealer |   #{rounds['Dealer']}    |   #{show_score(hands['Dealer'], dealer_hidden)}   | #{show_cards(hands['Dealer'], dealer_hidden)}"
+  show_player_statistics(rounds, hands)
+  show_dealer_statistics(rounds, hands, dealer_hidden)
   puts "--------------------------------------------------------"
+end
+
+def show_player_statistics(rounds, hands)
+  puts " Player |   #{rounds['Player']}    |\
+       #{show_score(hands['Player'])}   |\
+       #{show_cards(hands['Player'])}"
+end
+
+def show_dealer_statistics(rounds, hands, dealer_hidden)
+  puts " Dealer |   #{rounds['Dealer']}    |\
+       #{show_score(hands['Dealer'], dealer_hidden)}   |\
+       #{show_cards(hands['Dealer'], dealer_hidden)}"
 end
 
 def busted?(hand)
@@ -184,17 +195,20 @@ end
 def decide_winner(hands)
   player_score = calculate_score(hands['Player'])
   dealer_score = calculate_score(hands['Dealer'])
-  if busted?(hands['Dealer'])
-    'Player'
-  elsif busted?(hands['Player'])
+  case
+  when busted?(hands['Player'])
     'Dealer'
-  elsif player_score == dealer_score
+  when busted?(hands['Dealer']), higher_score(player_score, dealer_score)
+    'Player'
+  when higher_score(dealer_score, player_score)
+    'Dealer'
+  when player_score == dealer_score
     'Tie'
-  elsif player_score > dealer_score
-    'Player'
-  else
-    'Dealer'
   end
+end
+
+def higher_score(score_one, score_two)
+  score_one > score_two
 end
 
 def award_point(rounds, winner)
@@ -206,7 +220,7 @@ def overall_winner?(rounds)
 end
 
 def detect_overall_winner(rounds)
-  rounds.key(5) if rounds.values.include?(5)
+  rounds.key(5)
 end
 
 def announce_overall_winner(rounds, hands)
