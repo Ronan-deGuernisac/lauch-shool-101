@@ -8,7 +8,6 @@ SUITS = [
 ]
 
 CARDS = [
-  { name: "One", symbol: "1", points: 1 },
   { name: "Two", symbol: "2", points: 2 },
   { name: "Three", symbol: "3", points: 3 },
   { name: "Four", symbol: "4", points: 4 },
@@ -71,7 +70,7 @@ def show_score(hand, hidden_card=false)
 end
 
 def show_table(hands, dealer_hidden=true)
-  system 'clear' or system 'cls'
+  system('clear') || system('cls')
   puts "-----------------------------------------"
   puts " PLAYER | SCORE  | CARDS"
   puts "-----------------------------------------"
