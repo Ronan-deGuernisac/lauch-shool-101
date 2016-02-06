@@ -198,17 +198,13 @@ def decide_winner(hands)
   case
   when busted?(hands['Player'])
     'Dealer'
-  when busted?(hands['Dealer']), higher_score(player_score, dealer_score)
+  when busted?(hands['Dealer']), player_score > dealer_score
     'Player'
-  when higher_score(dealer_score, player_score)
-    'Dealer'
   when player_score == dealer_score
     'Tie'
+  else
+    'Dealer'
   end
-end
-
-def higher_score(score_one, score_two)
-  score_one > score_two
 end
 
 def award_point(rounds, winner)
